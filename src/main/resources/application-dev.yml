@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/fintogether}
+    username: ${DATASOURCE_USER:fintogether}
+    password: ${DATASOURCE_PASSWORD:fintogether}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true                # see SQL in dev only
+  security:
+    user:
+      name: dev
+      password: dev
