@@ -1,7 +1,10 @@
 package com.fintogether.user.controller;
 
+import com.fintogether.user.dto.LoginRequest;
+import com.fintogether.user.dto.LoginResponse;
 import com.fintogether.user.dto.SignupRequest;
 import com.fintogether.user.dto.UserResponse;
+import com.fintogether.user.service.AuthService;
 import com.fintogether.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ import java.net.URI;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
     private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping("/signup")
     public ResponseEntity<UserResponse> signup(@Valid @RequestBody SignupRequest request){
@@ -29,5 +33,11 @@ public class AuthController {
                 .buildAndExpand(userResponse.id())
                 .toUri();
         return ResponseEntity.created(location).body(userResponse);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        LoginResponse loginResponse = authService.login(request);
+        return ResponseEntity.ok(loginResponse);
     }
 }
