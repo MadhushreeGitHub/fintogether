@@ -3,6 +3,7 @@ package com.fintogether.user.repository;
 import com.fintogether.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
@@ -12,5 +13,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByPhone(String phone);
 
     boolean existsByUsername(String username);
+
+    Optional<User> findByEmail(String email);
 
 }

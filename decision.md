@@ -4,21 +4,33 @@
 Passwords should be hashed with a strong algorithm (e.g., BCrypt, Argon2) before storing in the database.
 4. Phone: max 15, must be a valid phone number format (e.g., E.164). Storage format for the phone number should be only digits i.e without any + signs.
 As it may add phone numbers outside of India as well, we should not restrict it to Indian numbers only.
-5. Role: enum earner and dependent. The role is assigned by the system, not the user. The user cannot choose their role during signup.
-6. DB column is user_name (snake_case for multi-word); entity field is username (Java camelCase). Bridged via @Column(name=...)
-7. In Auditable.java class createdBy and updatedBy typed as UUID to reference users.id. Stable identifier even if user changes email/username.
-8. Auditable Sprint 1 = createdAt + updatedAt only. Add createdBy/updatedBy after login endpoint exists and SecurityContext can supply the current user's UUID via AuditorAware bean.
-9. Uniqueness checks use existsByX (not findByX(...).isPresent()) — index-only scan, no heap fetch, no entity construction, clearer intent.
-10. findByEmail(String) deferred to FIN-6 (login). Signup only requires existsBy checks.
-11. Password encoder lives in its own PasswordEncoderConfig (no @Profile). SecurityConfig stays @Profile('dev'); prod filter chain lands in SecurityConfigProd in FIN-9.
-12. Conflict exceptions carry the conflicting value for server-side logging. Client-facing error messages remain generic to prevent enumeration attacks
-13. Domain exceptions extend RuntimeException. Spring's default transaction rollback triggers on unchecked exceptions; checked would require explicit @Transactional(rollbackFor=...) config on every service method.
-14. Normalization lives in com.fintogether.user.util.Normalizer — static utility class. email(String) and phone(String) methods. Called at the top of every service method that reads these fields (signup, login, future password reset). DTOs remain dumb data carriers; per-service inlining rejected due to duplication."
-15. "Phone normalization: strip all non-digit characters. +91 98765 43210 → 919876543210. Country code preserved."
-16. "Email normalization: lowercase + trim. MADHU@Gmail.com   → madhu@gmail.com.
-17. "@Transactional propagation left at default REQUIRED. Sufficient for MVP; write methods called from non-transactional controllers get their own transaction, and reuse the caller's transaction if invoked from within another transactional method.
+5. Normalization lives in com.fintogether.user.util.Normalizer — static utility class. email(String) and phone(String) methods. Called at the top of every service method that reads these fields (signup, login, future password reset). DTOs remain dumb data carriers; per-service inlining rejected due to duplication."
+6. Phone normalization: strip all non-digit characters. +91 98765 43210 → 919876543210. Country code preserved.
+7. Role: enum earner and dependent. The role is assigned by the system, not the user. The user cannot choose their role during signup.
+8. DB column is user_name (snake_case for multi-word); entity field is username (Java camelCase). Bridged via @Column(name=...)
+9. In Auditable.java class createdBy and updatedBy typed as UUID to reference users.id. Stable identifier even if user changes email/username.
+10. Auditable Sprint 1 = createdAt + updatedAt only. Add createdBy/updatedBy after login endpoint exists and SecurityContext can supply the current user's UUID via AuditorAware bean.
+11. Uniqueness checks use existsByX (not findByX(...).isPresent()) — index-only scan, no heap fetch, no entity construction, clearer intent.
+12. findByEmail(String) deferred to FIN-6 (login). Signup only requires existsBy checks.
+13. Password encoder lives in its own PasswordEncoderConfig (no @Profile). SecurityConfig stays @Profile('dev'); prod filter chain lands in SecurityConfigProd in FIN-9.
+14. Conflict exceptions carry the conflicting value for server-side logging. Client-facing error messages remain generic to prevent enumeration attacks
+15. Domain exceptions extend RuntimeException. Spring's default transaction rollback triggers on unchecked exceptions; checked would require explicit @Transactional(rollbackFor=...) config on every service method. 
+
+16. Email normalization: lowercase + trim. MADHU@Gmail.com   → madhu@gmail.com.
+17. @Transactional propagation left at default REQUIRED. Sufficient for MVP; write methods called from non-transactional controllers get their own transaction, and reuse the caller's transaction if invoked from within another transactional method.
 18. Service methods do not wrap save() in try/catch. DataIntegrityViolationException bubbles to GlobalExceptionHandler for 409 translation. Wrapping in RuntimeException would break the failure taxonomy.
 19. Dev-profile SecurityConfig permits /api/v1/auth/** unauthenticated. Production SecurityConfig will require authentication only on /api/v1/users/** and other protected resources; auth endpoints remain public by definition (signup, login, refresh).
+20. RSA 2048 for JWT signing. NIST baseline. Rotate to 3072 or 4096 if NIST guidance changes, or when token lifetimes extend beyond hours
+21. JwtService.generateAccessToken(User) — thick service pattern. Login and future callers pass the User; the service owns all JWT construction. Prevents claim inconsistency across callers and treats JWT as an implementation detail of authentication.
+22. Refresh token: fixed 7-day expiration. Rotation on every use. No sliding window in MVP — reconsider if user friction is real after launch.
+23. SecurityConfig split by profile. Dev = HTTP Basic (throwaway, matches quick-hit Postman testing). Non-dev = JWT via oauth2ResourceServer, consumes JwtDecoder bean. Switching profiles switches auth mechanism entirely
+24. Login accepts email + password only in MVP. Phone-based login deferred — requires runtime input-type detection and dispatch logic. Add as enhancement post-Phase 1 if user feedback demands
+25. authService separated from UserService. UserService = user CRUD, AuthService = login/refresh/logout. Prevents service-class bloat as auth surface grows.
+26. BadCredentialsException → 401 with uniform 'Invalid credentials' message. Never distinguishes wrong email from wrong password.
+
+
+## Future considerations (not in MVP):
+- Auth-related classes co-located under user package for Sprint 1. Extract to auth package if auth surface grows past ~5 files or if a second bounded context (admin auth) appears
 
 
 ## 🏁 Milestone: FIN-5 signup endpoint working end-to-end — 2026-07-22
