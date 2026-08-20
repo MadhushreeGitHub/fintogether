@@ -108,3 +108,9 @@ Gaps identified — topics to revisit:
 - Testcontainers integration tests
 - Static factory methods on entities as an alternative to @Builder
 - MapStruct vs. hand-written mappers
+
+- Database design decisions: "Opaque random string tokens (not JWT) for refresh — server-side lookup key only, no client-parseable payload needed. 
+SHA-256 hashed (not BCrypt) — deterministic for O(1) UNIQUE index lookup, safe because 256-bit random defeats dictionary attack. 
+revoked_at TIMESTAMPTZ (not boolean) — retains 'when' for audit + reuse-attack detection. No @SQLRestriction — revoked rows intentional for FIN-33 family invalidation."
+- Java 21 features: "HexFormat.of() for byte-to-hex (Java 17+ API, cleaner than manual loops)."
+- Microservices patterns: "family_id UUID groups all tokens from one login; enables RTR (Refresh Token Rotation) attack detection via family invalidation on reuse."

@@ -50,4 +50,10 @@ Not yet implemented in User entity, TBD before we add multi-user relationships.*
 
 **User entity has no public setters. Creation happens via User.create(...) static factory. Domain methods
 (changePassword, markDeleted) handle mutations**
+"2026-08-20: FIN-14 shipped. Refresh token = opaque 256-bit SecureRandom string, SHA-256 hashed for storage (not BCrypt — 
+need deterministic lookup). refresh_tokens table with family_id UUID for future RTR attack detection (FIN-33). 
+revoked_at TIMESTAMPTZ preserves audit trail. No @SQLDelete/@SQLRestriction on RefreshToken — revoked rows are the audit.
+FK to users table without ON DELETE CASCADE (users is soft-deleted anyway, and cascade would destroy audit history if hard delete ever fires). 
+AuthService transaction now @Transactional (writes). LoginResponse extended to 6 fields with refreshToken last. SENSITIVE_FIELDS extended to 
+include refreshToken and accessToken."
  

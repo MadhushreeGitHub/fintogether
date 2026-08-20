@@ -90,13 +90,15 @@
 ### ✅ Completed
 - Manual verification of signup (4 scenarios) via Postman from his laptop
 - Cross-machine Postman env `FinTogether Local` (base_url = LAN IPv4)
+- - **FIN-13:** login 
+- - **FIN-14:** Refresh token persistence + rotation
 
 ### 🚧 In progress
 - **FIN-11:** Postman collection for signup with pm.test() assertions
 - **FIN-12:** Jira test-case bank for signup (schema-constraint traceability)
 
 ### ⏳ Pending
-- **FIN-13:** Postman collection for login (blocked by FIN-6 — now unblocked)
+
 - **FIN-18:** Couple-linking security tests (Phase 2)
 - Newman CLI + GitHub Actions integration (Phase 4)
 
@@ -164,7 +166,7 @@ See `docs/decisions.md`. Last major batch: FIN-6 completion (2026-08-14).
 - PDF/Excel export
 
 ---
-
+ 
 ## PHASE MILESTONES
 
 - **Phase 1 (Weeks 1–3):** user-service auth complete — **on track**
