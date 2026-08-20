@@ -20,7 +20,13 @@ import java.util.Set;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-    private static final Set<String> SENSITIVE_FIELDS = Set.of("password", "passwordHash", "token");
+    private static final Set<String> SENSITIVE_FIELDS = Set.of(
+            "password",
+            "passwordHash",
+            "token",
+            "refreshToken",
+            "accessToken"
+     );
 
     private static boolean isSensitive(String field) {
         return SENSITIVE_FIELDS.contains(field);
